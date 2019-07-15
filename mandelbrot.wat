@@ -277,4 +277,3 @@
 (export "run" (func $run))
 (export "executeStep" (func $executeStep))
 (export "offsetFromCoordinate" (func $offsetFromCoordinate))
-
