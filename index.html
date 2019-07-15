@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<head>
+  <style>
+    body {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      background-color: #d4195d;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+    canvas {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <canvas width="1200" height="800"></canvas>
+  <script>
+    const memory = new WebAssembly.Memory({
+      initial: 80,
+      maximum: 80,
+      shared: true
+    });
+
+    // the 'seahorse tail'
+    // https://commons.wikimedia.org/wiki/File:Mandel_zoom_04_seehorse_tail.jpg
+    const config = {
+      x: -0.743644786,
+      y: 0.1318252536,
+      d: 0.00029336
+    };
+
+    const workerCount = 4;
+    let doneCount = 0;
+    const start = performance.now();
+
+    for (let i = 0; i < workerCount; i++) {
+      const worker = new Worker("worker.js");
+      worker.onmessage = e => {
+        doneCount++;
+        if (doneCount === workerCount) {
+          console.log("done", performance.now() - start);
+          const canvasData = new Uint8Array(memory.buffer, 4, 1200 * 800 * 4);
+          const context = document.querySelector("canvas").getContext("2d");
+          const imageData = context.createImageData(1200, 800);
+          imageData.data.set(canvasData);
+          context.putImageData(imageData, 0, 0);
+        }
+      };
+      worker.postMessage({ memory, config, id: i * 200 + 100 });
+    }
+  </script>
+</body>
