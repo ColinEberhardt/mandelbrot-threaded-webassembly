@@ -8,9 +8,9 @@
   (local $loc i32)
 
   (block $myblock
-    (loop 
+    (loop
 
-      (set_local $loc
+      (local.set $loc
         (i32.atomic.rmw.add
           (i32.const 0)
           (i32.const 1)
@@ -18,18 +18,18 @@
       )
 
       ;; loop for 1200 * 800
-      (br_if $myblock (i32.ge_u (get_local $loc) (i32.const 960000)))
-      
+      (br_if $myblock (i32.ge_u (local.get $loc) (i32.const 960000)))
+
       ;; convert to coordinates
-      (set_local $y
+      (local.set $y
         (i32.div_u
-          (get_local $loc)
+          (local.get $loc)
           (i32.const 1200)
         )
       )
-      (set_local $x
+      (local.set $x
         (i32.rem_u
-          (get_local $loc)
+          (local.get $loc)
           (i32.const 1200)
         )
       )
@@ -37,16 +37,16 @@
       ;; compute the next mandelbrot step and store
       (i32.store
         (call $offsetFromCoordinate
-          (get_local $x)
-          (get_local $y)
+          (local.get $x)
+          (local.get $y)
         )
         (call $colour
           (call $executeStep
-            (get_local $cx)
-            (get_local $cy)
-            (get_local $diameter)
-            (get_local $x)
-            (get_local $y)
+            (local.get $cx)
+            (local.get $cy)
+            (local.get $diameter)
+            (local.get $x)
+            (local.get $y)
           )
         )
       )
@@ -60,90 +60,90 @@
 (func $colour  (param $p0 i32) (result i32)
     (local $l0 i32) (local $l1 i32)
     block $B0
-      get_local $p0
+      local.get $p0
       i32.const 2
       i32.shl
       i32.const 1023
       i32.and
-      tee_local $l0
+      local.tee $l0
       i32.const 256
       i32.lt_u
       br_if $B0
-      get_local $l0
+      local.get $l0
       i32.const 512
       i32.lt_u
       if $I1
         i32.const 510
-        get_local $l0
+        local.get $l0
         i32.sub
-        set_local $l0
+        local.set $l0
         br $B0
       end
       i32.const 0
-      set_local $l0
+      local.set $l0
     end
-    get_local $l0
-    set_local $l1
+    local.get $l0
+    local.set $l1
     block $B2
-      get_local $p0
+      local.get $p0
       i32.const 2
       i32.shl
       i32.const 128
       i32.add
       i32.const 1023
       i32.and
-      tee_local $l0
+      local.tee $l0
       i32.const 256
       i32.lt_u
       br_if $B2
-      get_local $l0
+      local.get $l0
       i32.const 512
       i32.lt_u
       if $I3
         i32.const 510
-        get_local $l0
+        local.get $l0
         i32.sub
-        set_local $l0
+        local.set $l0
         br $B2
       end
       i32.const 0
-      set_local $l0
+      local.set $l0
     end
-    get_local $l0
+    local.get $l0
     i32.const 8
     i32.shl
-    get_local $l1
+    local.get $l1
     i32.or
-    set_local $l0
+    local.set $l0
     block $B4
-      get_local $p0
+      local.get $p0
       i32.const 2
       i32.shl
       i32.const 356
       i32.add
       i32.const 1023
       i32.and
-      tee_local $p0
+      local.tee $p0
       i32.const 256
       i32.lt_u
       br_if $B4
-      get_local $p0
+      local.get $p0
       i32.const 512
       i32.lt_u
       if $I5
         i32.const 510
-        get_local $p0
+        local.get $p0
         i32.sub
-        set_local $p0
+        local.set $p0
         br $B4
       end
       i32.const 0
-      set_local $p0
+      local.set $p0
     end
-    get_local $p0
+    local.get $p0
     i32.const 16
     i32.shl
-    get_local $l0
+    local.get $l0
     i32.or
     i32.const -16777216
     i32.or)
@@ -155,10 +155,10 @@
     (i32.add
       (i32.mul
         (i32.const 4800) ;; 1200 * 4
-        (get_local $y))
+        (local.get $y))
       (i32.mul
         (i32.const 4)
-        (get_local $x))
+        (local.get $x))
     )
   )
 )
@@ -178,24 +178,24 @@
 ;;   return iterateEquation(rx, ry, 10000);
 ;; }
 (func $executeStep  (param $cx f64) (param $cy f64) (param $d f64) (param $x i32) (param $y i32) (result i32)
-  get_local $cx
-  get_local $d
-  get_local $x
-  f64.convert_s/i32
+  local.get $cx
+  local.get $d
+  local.get $x
+  f64.convert_i32_s
   f64.const 0x1.2cp+10 (;=1200;)
   f64.sub
   f64.const 0x1.2cp+10 (;=1200;)
   f64.div
   f64.mul
   f64.add
-  get_local $cy
-  get_local $d
+  local.get $cy
+  local.get $d
   f64.const 0x1.9p+9 (;=800;)
   f64.mul
   f64.const 0x1.2cp+10 (;=1200;)
   f64.div
-  get_local $y
-  f64.convert_s/i32
+  local.get $y
+  f64.convert_i32_s
   f64.const 0x1.9p+9 (;=800;)
   f64.sub
   f64.const 0x1.9p+9 (;=800;)
@@ -226,51 +226,51 @@
   (local $l3 f64)
   (local $l4 f64)
   loop $L0
-    get_local $l4
-    get_local $l4
+    local.get $l4
+    local.get $l4
     f64.mul
-    get_local $l1
-    get_local $l1
+    local.get $l1
+    local.get $l1
     f64.mul
     f64.add
     f64.const 0x1p+2 (;=4;)
     f64.le
     i32.const 0
-    get_local $l0
-    get_local $p2
+    local.get $l0
+    local.get $p2
     i32.lt_u
     select
     if $I1
-      get_local $l2
-      get_local $l3
+      local.get $l2
+      local.get $l3
       f64.mul
-      set_local $l1
-      get_local $l2
-      get_local $l2
+      local.set $l1
+      local.get $l2
+      local.get $l2
       f64.mul
-      get_local $l3
-      get_local $l3
+      local.get $l3
+      local.get $l3
       f64.mul
       f64.sub
-      get_local $p0
+      local.get $p0
       f64.add
-      tee_local $l4
-      set_local $l2
-      get_local $l1
-      get_local $l1
+      local.tee $l4
+      local.set $l2
+      local.get $l1
+      local.get $l1
       f64.add
-      get_local $p1
+      local.get $p1
       f64.add
-      tee_local $l1
-      set_local $l3
-      get_local $l0
+      local.tee $l1
+      local.set $l3
+      local.get $l0
       i32.const 1
       i32.add
-      set_local $l0
+      local.set $l0
       br $L0
     end
   end
-  get_local $l0
+  local.get $l0
 )
 
 (export "iterateEquation" (func $iterateEquation))
